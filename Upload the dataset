@@ -1,0 +1,5 @@
+import pandas as pd
+from google.colab import files
+uploaded=files.upload()
+df=pd.read_csv("Telco-Customer-Churn.csv")
+df.head(100)
