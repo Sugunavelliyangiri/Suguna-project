@@ -1,0 +1,11 @@
+ print(df.isnull().sum())
+df['TotalCharges'] = pd.to_numeric(df['TotalCharges'], errors='coerce')  # convert to numeric, forcing errors to NaN
+df['TotalCharges'].fillna(df['TotalCharges'].median(), inplace=True)
+print("Duplicates:", df.duplicated().sum())
+df.drop_duplicates(inplace=True)
+df['SeniorCitizen'] = df['SeniorCitizen'].map({1: 'Yes', 0: 'No'})
+for col in df.select_dtypes(include='object').columns:
+    df[col] = df[col].str.strip()
+print(df['Churn'].unique())
+print(df.info())
+print(df.head())
