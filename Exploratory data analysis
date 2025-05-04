@@ -1,0 +1,27 @@
+import pandas as pd
+import matplotlib.pyplot as plt
+import seaborn as sns
+
+numerical_features = df.select_dtypes(include=['int64', 'float64']).columns
+df[numerical_features].hist(figsize=(12, 10), bins=30)
+plt.suptitle("Histograms of Numerical Features")
+plt.tight_layout()
+plt.show()
+
+
+plt.figure(figsize=(10, 8))
+correlation = df[numerical_features].corr()
+sns.heatmap(correlation, annot=True, cmap='coolwarm')
+plt.title("Correlation Heatmap")
+plt.show()
+
+# Bar plots for categorical feat
+categorical_features = df.select_dtypes(include='object').columns
+for col in categorical_features:
+    if col != 'Churn':
+        plt.figure(figsize=(6, 4))
+        sns.countplot(data=df, x=col, hue='Churn')
+        plt.title(f"{col} vs Churn")
+        plt.xticks(rotation=45)
+        plt.tight_layout()
+        plt.show()
