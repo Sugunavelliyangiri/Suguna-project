@@ -1,0 +1,58 @@
+# Install necessary libraries if you haven't already
+# pip install pandas numpy scikit-learn xgboost shap matplotlib seaborn
+
+import pandas as pd
+import numpy as np
+import matplotlib.pyplot as plt
+import seaborn as sns
+import shap # Make sure shap is imported
+from sklearn.model_selection import train_test_split
+from sklearn.preprocessing import LabelEncoder
+from xgboost import XGBClassifier
+
+# Load the dataset
+df = pd.read_csv('Telco-Customer-Churn.csv')
+
+# Preprocess dataset: drop customerID, encode categorical variables
+df.drop('customerID', axis=1, inplace=True)
+df.replace(' ', np.nan, inplace=True)
+df.dropna(inplace=True)
+
+# Encode target and categorical variables
+le = LabelEncoder()
+df['Churn'] = le.fit_transform(df['Churn'])
+
+for col in df.select_dtypes(include='object').columns:
+    df[col] = le.fit_transform(df[col])
+
+# Split data
+X = df.drop('Churn', axis=1)
+y = df['Churn']
+
+X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.2, random_state=42)
+
+# Train XGBoost model
+model = XGBClassifier(use_label_encoder=False, eval_metric='logloss')
+model.fit(X_train, y_train)
+
+# Feature importance (bar plot)
+importances = model.feature_importances_
+features = X.columns
+indices = np.argsort(importances)
+
+plt.figure(figsize=(10, 8))
+plt.title('Feature Importances (XGBoost)')
+sns.barplot(x=importances[indices], y=features[indices], palette='viridis')
+plt.xlabel('Relative Importance')
+plt.ylabel('Features')
+plt.tight_layout()
+plt.show()
+
+# SHAP values
+# Create TreeExplainer object and calculate SHAP values
+explainer = shap.TreeExplainer(model)
+shap_values = explainer.shap_values(X_test)
+
+# You can then visualize the SHAP values using various plots provided by shap
+# For example, to create a summary plot:
+shap.summary_plot(shap_values, X_test)
